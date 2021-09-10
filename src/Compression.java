@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.lang.Integer;
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.math.BigInteger;
-import java.io.FileOutputStream;
+//import java.math.BigInteger;
+//import java.io.FileOutputStream;
 
 
 public class Compression {
@@ -20,11 +20,11 @@ public class Compression {
 		}
 	}
 	@SuppressWarnings("deprecation")
-	public void compress (String inputFileName, String outputFileName) throws IOException {
+	public void compress (String inputFileName) throws IOException {
 		
 		BufferedReader reader = new BufferedReader (new FileReader (inputFileName));
 		
-		int number = 257;
+		int number = 256;
 		String current = "" + reader.read();
 		String next = "";
 		
@@ -51,7 +51,7 @@ public class Compression {
 		
 		reader.close();
 		
-		
+		/*
 		byte[] byteArray = new byte[numberedValues.size()*3+10];
 		for (int i = 0; i< numberedValues.size(); i++) {
 			if (numberedValues.get(i)< 256) {
@@ -74,7 +74,7 @@ public class Compression {
 		FileOutputStream writer = new FileOutputStream(outputFileName);
 		writer.write(byteArray);
 		
-		writer.close(); 
+		writer.close(); */
 	}
 	/*
 	
