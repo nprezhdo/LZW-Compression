@@ -1,12 +1,10 @@
 
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.HashMap;
-import java.lang.Integer;
+import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
-//import java.math.BigInteger;
-//import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.*;
+
 
 
 public class Compression {
@@ -19,37 +17,43 @@ public class Compression {
 			table.put( "" + (char)i , i);
 		}
 	}
+	
 	@SuppressWarnings("deprecation")
-	public void compress (String inputFileName) throws IOException {
-		
-		BufferedReader reader = new BufferedReader (new FileReader (inputFileName));
-		
-		int number = 256;
-		String current = "" + reader.read();
-		String next = "";
-		
-		ArrayList<Integer> numberedValues = new ArrayList<Integer>();
-		
-		while(reader.ready()) {
-			next = "" + reader.read();
-			String cAndN = current+ next;
+	public void compress (File inputFile) throws IOException{
+
+			BufferedReader reader = new BufferedReader (new FileReader(inputFile));
 			
-			while (table.containsKey(cAndN)){
-				current = current + next;
-				next = "" + reader.read();
-				numberedValues.add(new Integer(table.get(current)));
-				cAndN = current+ next;
+			int number = 256;
+			String current = "" + (char)reader.read();
+			String next = "";
+			
+			ArrayList<Integer> numberedValues = new ArrayList<Integer>();
+			
+			while(reader.ready()) {
+				next = "" + (char)reader.read();
+				String cAndN = current+ next;
+				
+				if (table.containsKey(cAndN)){
+					current = current + next;
+				}
+				else
+				{
+					table.put(cAndN, number);
+					number++;
+					numberedValues.add(table.get(current));
+					current = next;
+				}
+			}
+			numberedValues.add(table.get(current));
+			
+			for (int i = 0; i < numberedValues.size(); i++)
+			{
+				System.out.println (numberedValues.get(i));
 			}
 			
-			table.put(cAndN, new Integer(number));
-			number++;
-			numberedValues.add(new Integer(table.get(current)));
-			current = next;
-			
-			
+			reader.close();
 		}
 		
-		reader.close();
 		
 		/*
 		byte[] byteArray = new byte[numberedValues.size()*3+10];
@@ -75,13 +79,11 @@ public class Compression {
 		writer.write(byteArray);
 		
 		writer.close(); */
-	}
-	/*
+	
 	
 	public static void main (String[] args) throws IOException {
 		Compression lolW = new Compression ();
-		lolW.compress("lzw-test3.txt", "output.txt");
+		lolW.compress(new File("/Users/Alex/Desktop/Advanced-Topics-CS/LZW-Compression/lzw-file1.txt"));
 	}
-	*/
 	
 }
