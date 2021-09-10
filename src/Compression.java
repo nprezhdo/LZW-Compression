@@ -48,6 +48,10 @@ public class Compression {
 			
 			
 		}
+		
+		reader.close();
+		
+		
 		byte[] byteArray = new byte[numberedValues.size()*3+10];
 		for (int i = 0; i< numberedValues.size(); i++) {
 			if (numberedValues.get(i)< 256) {
@@ -70,5 +74,14 @@ public class Compression {
 		FileOutputStream writer = new FileOutputStream(outputFileName);
 		writer.write(byteArray);
 		
+		writer.close(); 
 	}
+	/*
+	
+	public static void main (String[] args) throws IOException {
+		Compression lolW = new Compression ();
+		lolW.compress("lzw-test3.txt", "output.txt");
+	}
+	*/
+	
 }
