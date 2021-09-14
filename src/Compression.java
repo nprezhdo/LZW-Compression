@@ -59,10 +59,10 @@ public class Compression {
 	
 	public void decompress (ArrayList<Integer> encodedValues) throws IOException
 	{
-		HashMap<String,Integer> reconstructedDict = new HashMap <String,Integer>();
+		HashMap<Integer,String> reconstructedDict = new HashMap <Integer,String>();
 		//initializes new dictionary
 		for (int i = 0; i<256; i++) {
-			reconstructedDict.put( "" + (char)i , i);
+			reconstructedDict.put(i, "" + (char)i);
 		}
 		
 		int dictLength = 256;
@@ -70,25 +70,26 @@ public class Compression {
 		int firstVal = encodedValues.get(0);
 		String firstChar = "" + (char)(firstVal);
 		writer.write(firstChar);
+		String next = "";
+		String firstOfNext = "";
+		int oldVal = firstVal;
 		for (int k = 1; k < encodedValues.size(); k++)
 		{
 			int val = encodedValues.get(k);
-			String current = "" + (char)(val);
-			String next = "";
-			String firstOfNext = "";
-			if (!reconstructedDict.containsKey(current))
+			String previous = reconstructedDict.get(oldVal);
+			if (val >= dictLength)
 			{
-				next = firstChar;
-				next += firstOfNext;
+				next = previous + firstOfNext;
 			}
 			else
 			{
-				next = current;
-				writer.write(next);
-				firstOfNext = ""+next.charAt(0);
-				reconstructedDict.put(firstChar, dictLength);
-				firstChar = current;
+				next = reconstructedDict.get(val);
 			}
+			writer.write(next);
+			firstOfNext = "" + next.charAt(0);
+			reconstructedDict.put(dictLength, previous+firstOfNext);
+			dictLength++;
+			oldVal = val;
 		}
 		System.out.println ("File Decompressed");
 		writer.close();
@@ -123,7 +124,7 @@ public class Compression {
 	
 	public static void main (String[] args) throws IOException {
 		Compression lolW = new Compression ();
-		ArrayList<Integer> result = lolW.compress(new File("/Users/Alex/Desktop/Advanced-Topics-CS/LZW-Compression/lzw-file1.txt"));
+		ArrayList<Integer> result = lolW.compress(new File("/Users/Alex/Desktop/Advanced-Topics-CS/LZW-Compression/lzw-file3.txt"));
 		lolW.decompress(result);
 	}
 	
