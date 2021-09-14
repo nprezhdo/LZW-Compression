@@ -50,12 +50,7 @@ public class Compression {
 			asciiValues.add(table.get(current));
 			reader.close();
 			return asciiValues;
-			/*for (int i = 0; i < asciiValues.size(); i++)
-			{
-				System.out.println (asciiValues.get(i));
-			}
 			
-			reader.close();*/
 			
 		}
 	
@@ -83,7 +78,9 @@ public class Compression {
 		//decompression algorithm
 		for (int k = 1; k < encodedValues.size(); k++)
 		{
+			//val set to the encoded dictionary index at index k in the ArrayList
 			int val = encodedValues.get(k);
+			// previous set to String representation mapped with oldVal
 			String previous = reconstructedDict.get(oldVal);
 			
 			//check for if the String representation of value is not in the dictionary
