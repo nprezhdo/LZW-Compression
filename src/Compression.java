@@ -1,87 +1,115 @@
 
 import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.HashMap;
-import java.lang.Integer;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
-//import java.math.BigInteger;
-//import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
+
 
 
 public class Compression {
 	
 	private HashMap<String, Integer> table = new HashMap<String, Integer>();
+	private ArrayList<Integer> asciiValues = new ArrayList<Integer>();
+	private File inputFile;
 	
-	public Compression () {
+	public Compression (File originalFile) {
 		// adds ascii table
 		for (int i = 0; i<256; i++) {
 			table.put( "" + (char)i , i);
 		}
+		inputFile = originalFile;
 	}
-	@SuppressWarnings("deprecation")
-	public void compress (String inputFileName) throws IOException {
-		
-		BufferedReader reader = new BufferedReader (new FileReader (inputFileName));
-		
-		int number = 256;
-		String current = "" + reader.read();
-		String next = "";
-		
-		ArrayList<Integer> numberedValues = new ArrayList<Integer>();
-		
-		while(reader.ready()) {
-			next = "" + reader.read();
-			String cAndN = current+ next;
-			
-			while (table.containsKey(cAndN)){
-				current = current + next;
-				next = "" + reader.read();
-				numberedValues.add(new Integer(table.get(current)));
-				cAndN = current+ next;
-			}
-			
-			table.put(cAndN, new Integer(number));
-			number++;
-			numberedValues.add(new Integer(table.get(current)));
-			current = next;
-			
-			
-		}
-		
-		reader.close();
-		
-		/*
-		byte[] byteArray = new byte[numberedValues.size()*3+10];
-		for (int i = 0; i< numberedValues.size(); i++) {
-			if (numberedValues.get(i)< 256) {
-				BigInteger bigInt = new BigInteger("" + numberedValues.get(i).intValue());
-				byte[] littleArr = bigInt.toByteArray();
-				byteArray[i*3] = 0; 
-				for(int j = 1; j<= littleArr.length; j++) {
-					byteArray[i*3+j] = littleArr[j];
-				}
-			}
-			else {
-				BigInteger bigInt = new BigInteger("" + numberedValues.get(i).intValue());
-				byte[] littleArr = bigInt.toByteArray();
-				for(int j = 0; j< littleArr.length; j++) {
-					byteArray[i*3+j] = littleArr[j];
-				}
-				
-			}
-		}
-		FileOutputStream writer = new FileOutputStream(outputFileName);
-		writer.write(byteArray);
-		
-		writer.close(); */
-	}
-	/*
 	
-	public static void main (String[] args) throws IOException {
-		Compression lolW = new Compression ();
-		lolW.compress("lzw-test3.txt", "output.txt");
+	@SuppressWarnings("deprecation")
+	public ArrayList<Integer> compress () throws IOException{
+
+			BufferedReader reader = new BufferedReader (new FileReader(inputFile));
+			
+			int number = 256;
+			String current = "" + (char)reader.read();
+			String next = "";
+			
+			while(reader.ready()) {
+				next = "" + (char)reader.read();
+				String cAndN = current+ next;
+				
+				if (table.containsKey(cAndN)){
+					current = current + next;
+				}
+				else
+				{
+					table.put(cAndN, number);
+					number++;
+					asciiValues.add(table.get(current));
+					current = next;
+				}
+			}
+			asciiValues.add(table.get(current));
+			reader.close();
+			return asciiValues;
+			
+			
+		}
+	
+	public void decompress (ArrayList<Integer> encodedValues) throws IOException
+	{
+		HashMap<Integer,String> reconstructedDict = new HashMap <Integer,String>();
+		//initializes new dictionary
+		for (int i = 0; i<256; i++) {
+			reconstructedDict.put(i, "" + (char)i);
+		}
+		
+		int dictLength = 256;
+		BufferedWriter writer = new BufferedWriter(new FileWriter("/Users/Alex/Desktop/Advanced-Topics-CS/LZW-Compression/decompressedFile.txt"));
+		
+		//decodes first character of int array
+		int firstVal = encodedValues.get(0);
+		String firstChar = "" + (char)(firstVal);
+		writer.write(firstChar);
+		
+		//initializes values used in the for loop algorithm
+		String next = "";
+		String firstOfNext = "";
+		int oldVal = firstVal;
+		
+		//decompression algorithm
+		for (int k = 1; k < encodedValues.size(); k++)
+		{
+			//val set to the encoded dictionary index at index k in the ArrayList
+			int val = encodedValues.get(k);
+			// previous set to String representation mapped with oldVal
+			String previous = reconstructedDict.get(oldVal);
+			
+			//check for if the String representation of value is not in the dictionary
+			if (val >= dictLength)
+			{
+				next = previous + firstOfNext;
+			}
+			
+			//if String representation of value is in dictionary, set next equal to the String mapped with val
+			else
+			{
+				next = reconstructedDict.get(val);
+			}
+			writer.write(next);
+			firstOfNext = "" + next.charAt(0);
+			
+			//puts previous+firstOfNext string into the dictionary
+			reconstructedDict.put(dictLength, previous+firstOfNext);
+			dictLength++;
+			oldVal = val;
+		}
+		System.out.println ("File Decompressed");
+		writer.close();
 	}
-	*/
+		
+	public static void main (String[] args) throws IOException {
+		Compression lolW = new Compression (new File("/Users/Alex/Desktop/Advanced-Topics-CS/LZW-Compression/lzw-file3.txt"));
+		ArrayList<Integer> result = lolW.compress();
+		lolW.decompress(result);
+	}
 	
 }
