@@ -1,5 +1,6 @@
 
 import java.io.BufferedReader;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
@@ -14,6 +15,9 @@ public class Compression {
 	private HashMap<String, Integer> table = new HashMap<String, Integer>();
 	private ArrayList<Integer> asciiValues = new ArrayList<Integer>();
 	private File inputFile;
+	private long compressTime; 
+	private long decompressTime; 
+	
 	
 	public Compression (File originalFile) {
 		// adds ascii table
@@ -23,39 +27,67 @@ public class Compression {
 		inputFile = originalFile;
 	}
 	
+	public long timeCompression() throws IOException
+	{
+		long startTime = System.nanoTime();
+		this.compress(); 
+		long endTime = System.nanoTime();
+
+		long duration = (endTime - startTime);
+		return duration; 
+		
+	}
 	@SuppressWarnings("deprecation")
 	public ArrayList<Integer> compress () throws IOException{
-
+		long startTime = System.nanoTime();
+		
 			BufferedReader reader = new BufferedReader (new FileReader(inputFile));
-			
-			int number = 256;
+			String binaryString; 
 			String current = "" + (char)reader.read();
 			String next = "";
 			
 			while(reader.ready()) {
 				next = "" + (char)reader.read();
-				String cAndN = current+ next;
 				
-				if (table.containsKey(cAndN)){
+				if (table.containsKey(current+next)){
 					current = current + next;
 				}
 				else
 				{
-					table.put(cAndN, number);
-					number++;
+					table.put(current+next, table.size());
 					asciiValues.add(table.get(current));
 					current = next;
 				}
 			}
 			asciiValues.add(table.get(current));
 			reader.close();
+			compressTime = (System.nanoTime() - startTime);
+			System.out.println ("File compressed in " + compressTime + " ms");
 			return asciiValues;
+			
+			
+//			for(int i = 0; i < asciiValues.size(); i ++)
+//				
+//			{
+//				String binary = Integer.toBinaryString(asciiValues.get(i)); 
+//				binaryString += binary;
+//			}
+//			BinaryOut out = new BinaryOut("output.dat");
+//	        for (int i = 0; i < binaryString.length(); i++) {
+//	            if (binaryString.charAt(i) == '0') {
+//	                out.write(false);
+//	            } else {
+//	                out.write(true);
+//	            }
+//	        }
+//	        out.flush();
 			
 			
 		}
 	
 	public void decompress (ArrayList<Integer> encodedValues) throws IOException
 	{
+		long startTime = System.nanoTime();
 		HashMap<Integer,String> reconstructedDict = new HashMap <Integer,String>();
 		//initializes new dictionary
 		for (int i = 0; i<256; i++) {
@@ -63,7 +95,7 @@ public class Compression {
 		}
 		
 		int dictLength = 256;
-		BufferedWriter writer = new BufferedWriter(new FileWriter("/Users/Alex/Desktop/Advanced-Topics-CS/LZW-Compression/decompressedFile.txt"));
+		BufferedWriter writer = new BufferedWriter(new FileWriter("/Users/josephinetsai/eclipse-workspace/LZW-Compression/lzw-file1.txt"));
 		
 		//decodes first character of int array
 		int firstVal = encodedValues.get(0);
@@ -102,12 +134,13 @@ public class Compression {
 			dictLength++;
 			oldVal = val;
 		}
-		System.out.println ("File Decompressed");
+		decompressTime = (System.nanoTime() - startTime);
+		System.out.println ("File Decompressed in " + decompressTime + " ms");
 		writer.close();
 	}
 		
 	public static void main (String[] args) throws IOException {
-		Compression lolW = new Compression (new File("/Users/Alex/Desktop/Advanced-Topics-CS/LZW-Compression/lzw-file3.txt"));
+		Compression lolW = new Compression (new File("/Users/josephinetsai/eclipse-workspace/LZW-Compression/lzw-file1.txt"));
 		ArrayList<Integer> result = lolW.compress();
 		lolW.decompress(result);
 	}
