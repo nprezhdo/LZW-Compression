@@ -3,9 +3,11 @@ import java.io.BufferedReader;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.*;
 
 
@@ -17,7 +19,7 @@ public class Compression {
 	private File inputFile;
 	private long compressTime; 
 	private long decompressTime; 
-	
+
 	
 	public Compression (File originalFile) {
 		// adds ascii table
@@ -42,7 +44,7 @@ public class Compression {
 		long startTime = System.nanoTime();
 		
 			BufferedReader reader = new BufferedReader (new FileReader(inputFile));
-			String binaryString; 
+			String binaryString = null; 
 			String current = "" + (char)reader.read();
 			String next = "";
 			
@@ -63,24 +65,26 @@ public class Compression {
 			reader.close();
 			compressTime = (System.nanoTime() - startTime);
 			System.out.println ("File compressed in " + compressTime + " ms");
-			return asciiValues;
 			
 			
-//			for(int i = 0; i < asciiValues.size(); i ++)
-//				
-//			{
-//				String binary = Integer.toBinaryString(asciiValues.get(i)); 
-//				binaryString += binary;
-//			}
-//			BinaryOut out = new BinaryOut("output.dat");
-//	        for (int i = 0; i < binaryString.length(); i++) {
-//	            if (binaryString.charAt(i) == '0') {
-//	                out.write(false);
-//	            } else {
-//	                out.write(true);
-//	            }
-//	        }
-//	        out.flush();
+			
+			for(int i = 0; i < asciiValues.size(); i ++)
+				
+			{
+				String binary = Integer.toBinaryString(asciiValues.get(i)); 
+				binaryString += binary;
+			}
+			BinaryOut out = new BinaryOut("output.dat");
+	        for (int i = 0; i < binaryString.length(); i++) {
+	            if (binaryString.charAt(i) == '0') {
+	                out.write(false);
+	            } else {
+	                out.write(true);
+	            }
+	        }
+	        out.flush();
+	        
+	        return asciiValues;
 			
 			
 		}
@@ -96,7 +100,7 @@ public class Compression {
 		
 		int dictLength = 256;
 		BufferedWriter writer = new BufferedWriter(new FileWriter("/Users/josephinetsai/eclipse-workspace/LZW-Compression/lzw-file1.txt"));
-		
+		PrintStream out = new PrintStream(new FileOutputStream("output.txt"));
 		//decodes first character of int array
 		int firstVal = encodedValues.get(0);
 		String firstChar = "" + (char)(firstVal);
@@ -127,17 +131,25 @@ public class Compression {
 				next = reconstructedDict.get(val);
 			}
 			writer.write(next);
-			firstOfNext = "" + next.charAt(0);
 			
 			//puts previous+firstOfNext string into the dictionary
-			reconstructedDict.put(dictLength, previous+firstOfNext);
+			reconstructedDict.put(dictLength, previous+""+next.charAt(0));
 			dictLength++;
 			oldVal = val;
+			
+			
+			
+		}
+		for(int i = 0; i < encodedValues.size(); i++)
+		{
+			out.append(reconstructedDict.get(encodedValues.get(i))); 
 		}
 		decompressTime = (System.nanoTime() - startTime);
 		System.out.println ("File Decompressed in " + decompressTime + " ms");
 		writer.close();
-	}
+	
+		
+		}
 		
 	public static void main (String[] args) throws IOException {
 		Compression lolW = new Compression (new File("/Users/josephinetsai/eclipse-workspace/LZW-Compression/lzw-file1.txt"));
